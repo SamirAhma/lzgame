@@ -1,6 +1,10 @@
+'use client';
+
 import Link from 'next/link';
+import { useHighScores } from '@/lib/hooks/useHighScores';
 
 export default function Home() {
+  const { highScores } = useHighScores();
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
@@ -35,6 +39,20 @@ export default function Home() {
                 </svg>
               </div>
               <h2 className="text-3xl font-bold text-slate-100 mb-3">Tetris</h2>
+              <div className="mb-4">
+                <p className="text-emerald-400 font-medium mb-2">Top Scores:</p>
+                <div className="flex flex-wrap gap-2">
+                  {highScores.tetris.length > 0 ? (
+                    highScores.tetris.map((score, i) => (
+                      <span key={i} className="bg-slate-700 px-2 py-1 rounded text-sm text-slate-300">
+                        {score}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="text-slate-500 text-sm">No scores yet</span>
+                  )}
+                </div>
+              </div>
               <p className="text-slate-400 mb-4">
                 Stack falling blocks to clear lines. Active pieces use one eye, the stack uses the other.
               </p>
@@ -68,6 +86,20 @@ export default function Home() {
                 </svg>
               </div>
               <h2 className="text-3xl font-bold text-slate-100 mb-3">Snake</h2>
+              <div className="mb-4">
+                <p className="text-emerald-400 font-medium mb-2">Top Scores:</p>
+                <div className="flex flex-wrap gap-2">
+                  {highScores.snake.length > 0 ? (
+                    highScores.snake.map((score, i) => (
+                      <span key={i} className="bg-slate-700 px-2 py-1 rounded text-sm text-slate-300">
+                        {score}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="text-slate-500 text-sm">No scores yet</span>
+                  )}
+                </div>
+              </div>
               <p className="text-slate-400 mb-4">
                 Guide the snake to eat food and grow. The snake uses one eye, food uses the other.
               </p>

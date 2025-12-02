@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
+import { useHighScores } from '@/lib/hooks/useHighScores';
 
 const BOARD_WIDTH = 10;
 const BOARD_HEIGHT = 20;
@@ -58,6 +59,7 @@ export default function TetrisGame() {
     const [score, setScore] = useState(0);
     const [isPaused, setIsPaused] = useState(false);
     const gameLoopRef = useRef<NodeJS.Timeout | null>(null);
+    const { updateHighScore, highScores } = useHighScores();
 
     const createNewPiece = useCallback((): Piece => {
         const types = Object.keys(TETROMINOS) as TetrominoType[];
@@ -230,6 +232,12 @@ export default function TetrisGame() {
         };
     }, [movePiece, gameOver, isPaused]);
 
+    useEffect(() => {
+        if (gameOver) {
+            updateHighScore('tetris', score);
+        }
+    }, [gameOver, score, updateHighScore]);
+
     const renderBoard = () => {
         const displayBoard = board.map((row) => [...row]);
 
@@ -275,7 +283,10 @@ export default function TetrisGame() {
             </Link>
 
             <h1 className="text-4xl font-bold text-slate-100 mb-2">Tetris</h1>
-            <p className="text-slate-400 mb-6">Score: {score}</p>
+            <div className="flex gap-8 mb-6 text-slate-400">
+                <p>Score: {score}</p>
+                <p>High Score: {highScores.tetris[0] || 0}</p>
+            </div>
 
             <div
                 className="relative border-4 border-slate-700 bg-black"

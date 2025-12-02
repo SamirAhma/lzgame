@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
+import { useHighScores } from '@/lib/hooks/useHighScores';
 
 const GRID_SIZE = 20;
 const CELL_SIZE = 25;
@@ -19,6 +20,7 @@ export default function SnakeGame() {
     const [score, setScore] = useState(0);
     const [isPaused, setIsPaused] = useState(false);
     const gameLoopRef = useRef<NodeJS.Timeout | null>(null);
+    const { updateHighScore, highScores } = useHighScores();
 
     const generateFood = useCallback((snakeBody: Position[]): Position => {
         let newFood: Position;
@@ -39,7 +41,10 @@ export default function SnakeGame() {
             return true;
         }
         // Self collision
-        return body.some((segment) => segment.x === head.x && segment.y === head.y);
+        if (body.length < 2) return false;
+        // Ignore the last segment because it will move (unless we eat, but head != food here)
+        const bodyToCheck = body.slice(0, -1);
+        return bodyToCheck.some((segment) => segment.x === head.x && segment.y === head.y);
     }, []);
 
     const moveSnake = useCallback(() => {
@@ -129,6 +134,12 @@ export default function SnakeGame() {
         };
     }, [moveSnake, gameOver, isPaused]);
 
+    useEffect(() => {
+        if (gameOver) {
+            updateHighScore('snake', score);
+        }
+    }, [gameOver, score, updateHighScore]);
+
     const resetGame = () => {
         setSnake([{ x: 10, y: 10 }]);
         setFood({ x: 15, y: 15 });
@@ -149,7 +160,10 @@ export default function SnakeGame() {
             </Link>
 
             <h1 className="text-4xl font-bold text-slate-100 mb-2">Snake</h1>
-            <p className="text-slate-400 mb-6">Score: {score}</p>
+            <div className="flex gap-8 mb-6 text-slate-400">
+                <p>Score: {score}</p>
+                <p>High Score: {highScores.snake[0] || 0}</p>
+            </div>
 
             <div
                 className="relative border-4 border-slate-700  bg-black"
