@@ -1,6 +1,12 @@
+export interface ScoreEntry {
+    score: number;
+    date: string;
+    time: string;
+}
+
 export interface HighScores {
-    tetris: number[];
-    snake: number[];
+    tetris: ScoreEntry[];
+    snake: ScoreEntry[];
 }
 
 export const DEFAULT_SCORES: HighScores = {

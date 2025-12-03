@@ -274,18 +274,23 @@ export default function TetrisGame() {
     const displayBoard = renderBoard();
 
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center p-4">
+        <div className="min-h-screen flex flex-col items-center justify-center p-4 relative">
             <Link
                 href="/"
-                className="absolute top-4 left-4 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-100 rounded-lg transition-colors"
+                className="absolute top-4 left-4 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-100 rounded-lg transition-colors z-50"
             >
                 ← Back
             </Link>
 
             <h1 className="text-4xl font-bold text-slate-100 mb-2">Tetris</h1>
-            <div className="flex gap-8 mb-6 text-slate-400">
+            <div className="flex gap-8 mb-6 text-slate-400 items-start">
                 <p>Score: {score}</p>
-                <p>High Score: {highScores.tetris[0] || 0}</p>
+                <div className="flex flex-col items-end">
+                    <p>High Score: {highScores.tetris[0]?.score || 0}</p>
+                    {highScores.tetris[0]?.date && (
+                        <p className="text-xs text-slate-500">{highScores.tetris[0].date}</p>
+                    )}
+                </div>
             </div>
 
             <div

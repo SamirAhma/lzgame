@@ -151,18 +151,23 @@ export default function SnakeGame() {
     };
 
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center p-4">
+        <div className="min-h-screen flex flex-col items-center justify-center p-4 relative">
             <Link
                 href="/"
-                className="absolute top-4 left-4 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-100 rounded-lg transition-colors"
+                className="absolute top-4 left-4 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-100 rounded-lg transition-colors z-50"
             >
                 ← Back
             </Link>
 
             <h1 className="text-4xl font-bold text-slate-100 mb-2">Snake</h1>
-            <div className="flex gap-8 mb-6 text-slate-400">
+            <div className="flex gap-8 mb-6 text-slate-400 items-start">
                 <p>Score: {score}</p>
-                <p>High Score: {highScores.snake[0] || 0}</p>
+                <div className="flex flex-col items-end">
+                    <p>High Score: {highScores.snake[0]?.score || 0}</p>
+                    {highScores.snake[0]?.date && (
+                        <p className="text-xs text-slate-500">{highScores.snake[0].date}</p>
+                    )}
+                </div>
             </div>
 
             <div
@@ -229,6 +234,6 @@ export default function SnakeGame() {
                     <span style={{ color: 'var(--right-eye)' }}>Food (Right Eye)</span>
                 </p>
             </div>
-        </div>
+        </div >
     );
 }

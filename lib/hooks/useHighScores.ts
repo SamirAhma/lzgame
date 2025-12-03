@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { HighScores, DEFAULT_SCORES } from '@/lib/types/scores';
+import { HighScores, DEFAULT_SCORES, ScoreEntry } from '@/lib/types/scores';
 
 const STORAGE_KEY = 'amblyopia_high_scores';
 
@@ -13,7 +13,39 @@ export function useHighScores() {
         try {
             const stored = localStorage.getItem(STORAGE_KEY);
             if (stored) {
-                setHighScores(JSON.parse(stored));
+                const parsed = JSON.parse(stored);
+                // Migration logic: ensure all entries are ScoreEntry objects
+                const migrateScores = (scores: any): ScoreEntry[] => {
+                    if (typeof scores === 'number') {
+                        return [{
+                            score: scores,
+                            date: new Date().toLocaleDateString(),
+                            time: '--:--'
+                        }];
+                    }
+                    if (!Array.isArray(scores)) return [];
+
+                    return scores.map((s: any) => {
+                        if (typeof s === 'number') {
+                            return {
+                                score: s,
+                                date: new Date().toLocaleDateString(),
+                                time: '--:--'
+                            };
+                        }
+                        // Add time field if missing (for backward compatibility)
+                        if (!s.time) {
+                            return { ...s, time: '--:--' };
+                        }
+                        return s;
+                    });
+                };
+
+                const migrated: HighScores = {
+                    tetris: migrateScores(parsed.tetris),
+                    snake: migrateScores(parsed.snake),
+                };
+                setHighScores(migrated);
             }
         } catch (error) {
             console.error('Failed to load high scores:', error);
@@ -24,17 +56,17 @@ export function useHighScores() {
 
     const updateHighScore = (game: keyof HighScores, score: number) => {
         setHighScores((prev) => {
-            let currentScores = prev[game];
+            const currentScores = prev[game] || [];
 
-            // Handle legacy data (single number) or undefined
-            if (typeof currentScores === 'number') {
-                currentScores = [currentScores];
-            } else if (!Array.isArray(currentScores)) {
-                currentScores = [];
-            }
+            const now = new Date();
+            const newEntry: ScoreEntry = {
+                score,
+                date: now.toLocaleDateString(),
+                time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            };
 
-            const newScoresList = [...currentScores, score]
-                .sort((a, b) => b - a)
+            const newScoresList = [...currentScores, newEntry]
+                .sort((a, b) => b.score - a.score)
                 .slice(0, 10);
 
             const newScores = { ...prev, [game]: newScoresList };
