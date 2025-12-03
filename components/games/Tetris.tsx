@@ -1,12 +1,13 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useHighScores } from '@/lib/hooks/useHighScores';
+import BackButton from '@/components/ui/BackButton';
+import GameOverlay from '@/components/ui/GameOverlay';
+import { TETRIS, CONTROLS, SCORE } from '@/lib/constants/game';
 
-const BOARD_WIDTH = 10;
-const BOARD_HEIGHT = 20;
-const CELL_SIZE = 30;
+const { BOARD_WIDTH, BOARD_HEIGHT, CELL_SIZE } = TETRIS;
 
 type Cell = 'empty' | 'active' | 'static';
 type Board = Cell[][];
@@ -60,6 +61,7 @@ export default function TetrisGame() {
     const [isPaused, setIsPaused] = useState(false);
     const gameLoopRef = useRef<NodeJS.Timeout | null>(null);
     const { updateHighScore, highScores } = useHighScores();
+    const router = useRouter();
 
     const createNewPiece = useCallback((): Piece => {
         const types = Object.keys(TETROMINOS) as TetrominoType[];
@@ -124,7 +126,7 @@ export default function TetrisGame() {
         }
 
         setBoard(newBoard);
-        setScore((prev) => prev + linesCleared * 100);
+        setScore((prev) => prev + linesCleared * SCORE.TETRIS_LINE_POINTS);
 
         // Check game over
         const newPiece = createNewPiece();
@@ -181,23 +183,23 @@ export default function TetrisGame() {
             if (gameOver) return;
 
             switch (e.key) {
-                case 'ArrowLeft':
+                case CONTROLS.ARROW_LEFT:
                     movePiece(-1, 0);
                     break;
-                case 'ArrowRight':
+                case CONTROLS.ARROW_RIGHT:
                     movePiece(1, 0);
                     break;
-                case 'ArrowDown':
+                case CONTROLS.ARROW_DOWN:
                     movePiece(0, 1);
                     break;
-                case 'ArrowUp':
+                case CONTROLS.ARROW_UP:
                     rotatePiece();
                     break;
-                case ' ':
+                case CONTROLS.SPACE:
                     dropPiece();
                     break;
-                case 'p':
-                case 'P':
+                case CONTROLS.PAUSE[0]:
+                case CONTROLS.PAUSE[1]:
                     setIsPaused((prev) => !prev);
                     break;
             }
@@ -275,12 +277,7 @@ export default function TetrisGame() {
 
     return (
         <div className="min-h-screen flex flex-col items-center justify-center p-4 relative">
-            <Link
-                href="/"
-                className="absolute top-4 left-4 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-100 rounded-lg transition-colors z-50"
-            >
-                ← Back
-            </Link>
+            <BackButton className="absolute top-4 left-4 z-50" />
 
             <h1 className="text-4xl font-bold text-slate-100 mb-2">Tetris</h1>
             <div className="flex gap-8 mb-6 text-slate-400 items-start">
@@ -322,26 +319,17 @@ export default function TetrisGame() {
                     ))
                 )}
 
-                {gameOver && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/80">
-                        <div className="text-center">
-                            <h2 className="text-3xl font-bold text-slate-100 mb-4">Game Over!</h2>
-                            <p className="text-xl text-slate-300 mb-6">Final Score: {score}</p>
-                            <button
-                                onClick={resetGame}
-                                className="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium transition-colors"
-                            >
-                                Play Again
-                            </button>
-                        </div>
-                    </div>
-                )}
+                <GameOverlay isVisible={gameOver} title="Game Over!">
+                    <p className="text-xl text-slate-300 mb-6">Final Score: {score}</p>
+                    <button
+                        onClick={resetGame}
+                        className="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium transition-colors"
+                    >
+                        Play Again
+                    </button>
+                </GameOverlay>
 
-                {isPaused && !gameOver && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/80">
-                        <h2 className="text-3xl font-bold text-slate-100">PAUSED</h2>
-                    </div>
-                )}
+                <GameOverlay isVisible={isPaused && !gameOver} title="PAUSED" />
             </div>
 
             <div className="mt-6 text-center text-slate-400 space-y-2">

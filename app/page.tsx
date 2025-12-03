@@ -67,26 +67,34 @@ export default function Home() {
               {/* High Score Display */}
               <div className="relative mb-6 p-4 bg-slate-900/50 rounded-xl border border-slate-700/50">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-cyan-400 font-semibold text-sm uppercase tracking-wide">High Score</span>
+                  <span className="text-cyan-400 font-semibold text-sm uppercase tracking-wide">Top 10 Scores</span>
                   {highScores.tetris.length > 0 && (
                     <span className="px-2 py-1 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/30 rounded-full text-yellow-400 text-xs font-bold">
-                      🏆 Best
+                      🏆 {highScores.tetris.length} Score{highScores.tetris.length !== 1 ? 's' : ''}
                     </span>
                   )}
                 </div>
                 {highScores.tetris.length > 0 ? (
-                  <div className="space-y-2">
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400">
-                        {highScores.tetris[0].score}
-                      </span>
-                      <span className="text-slate-500 text-sm">points</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-slate-400 text-xs">
-                      <span>{highScores.tetris[0].date}</span>
-                      <span className="text-slate-600">•</span>
-                      <span>{highScores.tetris[0].time}</span>
-                    </div>
+                  <div className="space-y-2 max-h-48 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-slate-900">
+                    {highScores.tetris.map((entry, index) => (
+                      <div key={index} className={`flex items-center justify-between p-2 rounded ${index === 0 ? 'bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/20' : 'bg-slate-800/30'}`}>
+                        <div className="flex items-center gap-3">
+                          <span className={`text-lg font-bold ${index === 0 ? 'text-yellow-400' : index === 1 ? 'text-slate-300' : index === 2 ? 'text-orange-400' : 'text-slate-500'}`}>
+                            #{index + 1}
+                          </span>
+                          <div>
+                            <div className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400">
+                              {entry.score}
+                            </div>
+                            <div className="flex items-center gap-1 text-slate-500 text-xs">
+                              <span>{entry.date}</span>
+                              <span>•</span>
+                              <span>{entry.time}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 ) : (
                   <span className="text-slate-500 text-sm">No scores yet - be the first!</span>
@@ -148,26 +156,34 @@ export default function Home() {
               {/* High Score Display */}
               <div className="relative mb-6 p-4 bg-slate-900/50 rounded-xl border border-slate-700/50">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-pink-400 font-semibold text-sm uppercase tracking-wide">High Score</span>
+                  <span className="text-pink-400 font-semibold text-sm uppercase tracking-wide">Top 10 Scores</span>
                   {highScores.snake.length > 0 && (
                     <span className="px-2 py-1 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/30 rounded-full text-yellow-400 text-xs font-bold">
-                      🏆 Best
+                      🏆 {highScores.snake.length} Score{highScores.snake.length !== 1 ? 's' : ''}
                     </span>
                   )}
                 </div>
                 {highScores.snake.length > 0 ? (
-                  <div className="space-y-2">
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-orange-400">
-                        {highScores.snake[0].score}
-                      </span>
-                      <span className="text-slate-500 text-sm">points</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-slate-400 text-xs">
-                      <span>{highScores.snake[0].date}</span>
-                      <span className="text-slate-600">•</span>
-                      <span>{highScores.snake[0].time}</span>
-                    </div>
+                  <div className="space-y-2 max-h-48 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-slate-900">
+                    {highScores.snake.map((entry, index) => (
+                      <div key={index} className={`flex items-center justify-between p-2 rounded ${index === 0 ? 'bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/20' : 'bg-slate-800/30'}`}>
+                        <div className="flex items-center gap-3">
+                          <span className={`text-lg font-bold ${index === 0 ? 'text-yellow-400' : index === 1 ? 'text-slate-300' : index === 2 ? 'text-orange-400' : 'text-slate-500'}`}>
+                            #{index + 1}
+                          </span>
+                          <div>
+                            <div className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-orange-400">
+                              {entry.score}
+                            </div>
+                            <div className="flex items-center gap-1 text-slate-500 text-xs">
+                              <span>{entry.date}</span>
+                              <span>•</span>
+                              <span>{entry.time}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 ) : (
                   <span className="text-slate-500 text-sm">No scores yet - be the first!</span>

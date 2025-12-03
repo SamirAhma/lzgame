@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { HighScores, DEFAULT_SCORES, ScoreEntry } from '@/lib/types/scores';
-
-const STORAGE_KEY = 'amblyopia_high_scores';
+import { STORAGE_KEYS, SCORE } from '@/lib/constants/game';
 
 export function useHighScores() {
     const [highScores, setHighScores] = useState<HighScores>(DEFAULT_SCORES);
@@ -11,7 +10,7 @@ export function useHighScores() {
 
     useEffect(() => {
         try {
-            const stored = localStorage.getItem(STORAGE_KEY);
+            const stored = localStorage.getItem(STORAGE_KEYS.HIGH_SCORES);
             if (stored) {
                 const parsed = JSON.parse(stored);
                 // Migration logic: ensure all entries are ScoreEntry objects
@@ -67,11 +66,11 @@ export function useHighScores() {
 
             const newScoresList = [...currentScores, newEntry]
                 .sort((a, b) => b.score - a.score)
-                .slice(0, 10);
+                .slice(0, SCORE.MAX_HIGH_SCORES);
 
             const newScores = { ...prev, [game]: newScoresList };
             try {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(newScores));
+                localStorage.setItem(STORAGE_KEYS.HIGH_SCORES, JSON.stringify(newScores));
             } catch (error) {
                 console.error('Failed to save high scores:', error);
             }
