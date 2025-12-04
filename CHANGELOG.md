@@ -4,7 +4,42 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2025-12-05] - Back Button Navigation Fix
+
+### Fixed
+
+#### BackButton Component Navigation
+- **What**: Fixed back button navigation in Snake and Tetris game pages
+- **Why**: Back button was navigating to home page (`/`) instead of going back to the previous page in browser history
+- **Details**:
+  - Changed `router.push('/')` to `router.back()` in BackButton component
+  - Updated aria-label from "Go back to home" to "Go back to previous page"
+  - Now properly uses browser history navigation
+  - Works correctly when accessing games from different pages
+
+### Added
+
+#### BackButton Component Tests
+- **What**: Created comprehensive test suite for BackButton component
+- **File**: `frontend/components/ui/__tests__/BackButton.test.tsx`
+- **Coverage**:
+  - Verifies button renders with correct text
+  - Tests that `router.back()` is called on click
+  - Validates custom className application
+  - Checks all styling classes are applied correctly
+- **Result**: Full test coverage for BackButton component
+
+### Technical Notes
+- This fix ensures proper navigation behavior in single-page applications
+- Users can now navigate back to wherever they came from (home, dashboard, etc.)
+- No breaking changes - only improved navigation behavior
+
+### Files Modified
+- `frontend/components/ui/BackButton.tsx` - Changed navigation from push to back
+- `frontend/components/ui/__tests__/BackButton.test.tsx` - NEW test file
+
 ## [2025-12-05] - Refresh Token Implementation
+
 
 ### Added
 

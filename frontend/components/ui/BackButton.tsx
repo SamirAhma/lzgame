@@ -11,9 +11,9 @@ export default function BackButton({ className = '' }: BackButtonProps) {
 
     return (
         <button
-            onClick={() => router.push('/')}
+            onClick={() => router.back()}
             className={`px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-100 rounded-lg transition-colors ${className}`}
-            aria-label="Go back to home"
+            aria-label="Go back to previous page"
         >
             ← Back
         </button>
