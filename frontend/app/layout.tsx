@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ColorProvider from "@/components/ColorProvider";
 import SettingsPanel from "@/components/SettingsPanel";
+import Navbar from "@/components/Navbar";
 import Providers from "./providers";
 import { AuthProvider } from "@/context/AuthContext";
 
@@ -32,6 +33,7 @@ export default function RootLayout({
         <Providers>
           <AuthProvider>
             <ColorProvider>
+              <Navbar />
               <SettingsPanel />
               {children}
             </ColorProvider>

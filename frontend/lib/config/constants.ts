@@ -8,6 +8,7 @@ export const STORAGE_KEYS = {
     TOKEN: 'token',
     REFRESH_TOKEN: 'refreshToken',
     SETTINGS: 'lazy_eye_settings',
+    SCORES: 'lazy_eye_scores',
 } as const;
 
 // API Endpoints

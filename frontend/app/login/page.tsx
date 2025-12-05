@@ -1,3 +1,5 @@
+'use client';
+
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -7,6 +9,7 @@ import Link from 'next/link';
 import api from '@/lib/api';
 import { setToken, setRefreshToken } from '@/lib/utils/storage';
 import { API_ENDPOINTS } from '@/lib/config/constants';
+import { useAuth } from '@/context/AuthContext';
 
 const loginSchema = z.object({
     email: z.string().email('Invalid email address'),
@@ -16,6 +19,7 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
+    const { login } = useAuth();
     const router = useRouter();
     const {
         register,
@@ -29,9 +33,16 @@ export default function LoginPage() {
         mutationFn: (data: LoginFormValues) =>
             api.post(API_ENDPOINTS.AUTH_LOGIN, data).then((res) => res.data),
         onSuccess: (data) => {
-            setToken(data.access_token);
-            setRefreshToken(data.refresh_token);
-            router.push('/dashboard');
+            console.log('[Login] Success! Received data:', data);
+            login(data.access_token);
+            // Refresh token is handled by the initial login response usually, 
+            // but AuthProvider only takes one token. 
+            // We should ensure refresh token is stored if the API returns it.
+            // valid point: context login() only takes one arg.
+            // Let's manually set refresh token if needed or check AuthContext.
+            if (data.refresh_token) {
+                setRefreshToken(data.refresh_token);
+            }
         },
     });
 

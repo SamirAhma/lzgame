@@ -101,6 +101,33 @@ export function removeSettings(): void {
     removeItem(STORAGE_KEYS.SETTINGS);
 }
 
+// Scores Management
+import { HighScores } from '@/lib/types/scores';
+
+export function getHighScores(): HighScores | null {
+    const data = getItem(STORAGE_KEYS.SCORES);
+    if (!data) return null;
+
+    try {
+        return JSON.parse(data) as HighScores;
+    } catch (error) {
+        console.error('Error parsing scores from localStorage:', error);
+        return null;
+    }
+}
+
+export function setHighScores(scores: HighScores): void {
+    try {
+        setItem(STORAGE_KEYS.SCORES, JSON.stringify(scores));
+    } catch (error) {
+        console.error('Error saving scores to localStorage:', error);
+    }
+}
+
+export function removeAllScores(): void {
+    removeItem(STORAGE_KEYS.SCORES);
+}
+
 // Clear all auth-related data
 export function clearAuthData(): void {
     removeToken();

@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+- **Navbar Component**: Created global navigation bar (2025-12-05)
+  - Fixed navbar at top of all pages
+  - Responsive design with logo and game links
+  - Integrated auth state (login/logout)
+  - Auto-hides on auth pages (login/register/forgot-password)
+  - Active page highlighting for better UX
+
 ### Changed
 
 #### Backend Refactoring - Environment Variables
