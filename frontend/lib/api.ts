@@ -17,9 +17,13 @@ api.interceptors.request.use((config) => {
 
 // Response interceptor for 401 handling and token refresh
 let isRefreshing = false;
-let failedQueue: any[] = [];
+type FailedRequest = {
+    resolve: (token: string | null) => void;
+    reject: (error: unknown) => void;
+};
+let failedQueue: FailedRequest[] = [];
 
-const processQueue = (error: any, token: string | null = null) => {
+const processQueue = (error: unknown, token: string | null = null) => {
     failedQueue.forEach(prom => {
         if (error) {
             prom.reject(error);
@@ -97,5 +101,21 @@ api.interceptors.response.use(
         return Promise.reject(error);
     }
 );
+
+export const verifyEmail = async (token: string) => {
+    return api.post('/auth/verify-email', { token });
+};
+
+export const resendVerification = async (email: string) => {
+    return api.post('/auth/resend-verification', { email });
+};
+
+export const forgotPassword = async (email: string) => {
+    return api.post('/auth/forgot-password', { email });
+};
+
+export const resetPassword = async (token: string, password: string) => {
+    return api.post('/auth/reset-password', { token, password });
+};
 
 export default api;

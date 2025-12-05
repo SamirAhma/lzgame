@@ -22,6 +22,26 @@ export class AuthController {
         return this.authService.login(loginDto);
     }
 
+    @Post('verify-email')
+    async verifyEmail(@Body('token') token: string) {
+        return this.authService.verifyEmail(token);
+    }
+
+    @Post('resend-verification')
+    async resendVerification(@Body('email') email: string) {
+        return this.authService.resendVerification(email);
+    }
+
+    @Post('forgot-password')
+    async forgotPassword(@Body('email') email: string) {
+        return this.authService.forgotPassword(email);
+    }
+
+    @Post('reset-password')
+    async resetPassword(@Body() body: any) {
+        return this.authService.resetPassword(body.token, body.password);
+    }
+
     @Post('refresh')
     @UsePipes(ZodValidationPipe)
     refresh(@Body() refreshTokenDto: RefreshTokenDto) {

@@ -1,30 +1,168 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
+import { EmailService } from './email.service';
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class AuthService {
     constructor(
         private prisma: PrismaService,
         private jwtService: JwtService,
+        private emailService: EmailService,
     ) { }
 
     async register(registerDto: RegisterDto) {
-        const hashedPassword = await bcrypt.hash(registerDto.password, 10);
-        const user = await this.prisma.user.create({
+        const { email, password } = registerDto;
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const verificationToken = crypto.randomBytes(32).toString('hex');
+
+        try {
+            const user = await this.prisma.user.create({
+                data: {
+                    email,
+                    password: hashedPassword,
+                    verificationToken,
+                    isVerified: false,
+                },
+            });
+
+            try {
+                await this.emailService.sendVerificationEmail(user.email, verificationToken);
+            } catch (error) {
+                console.error('Failed to send verification email:', error);
+                // User is created but email failed - they can resend later
+            }
+
+            return {
+                message: 'User created successfully. Please check your email to verify your account.',
+                user: {
+                    id: user.id,
+                    email: user.email,
+                },
+            };
+        } catch (error) {
+            console.error(error);
+            if (error.code === 'P2002') {
+                throw new BadRequestException('Email already exists');
+            }
+            throw error;
+        }
+    }
+
+    async verifyEmail(token: string) {
+        const user = await this.prisma.user.findFirst({
+            where: { verificationToken: token },
+        });
+
+        if (!user) {
+            throw new BadRequestException('Invalid verification token');
+        }
+
+        await this.prisma.user.update({
+            where: { id: user.id },
             data: {
-                email: registerDto.email,
-                password: hashedPassword,
+                isVerified: true,
+                verificationToken: null,
             },
         });
-        return {
-            message: 'User created successfully',
-            user: { id: user.id, email: user.email },
-        };
+
+        return { message: 'Email verified successfully' };
+    }
+
+    async resendVerification(email: string) {
+        const user = await this.prisma.user.findUnique({
+            where: { email },
+        });
+
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+
+        if (user.isVerified) {
+            throw new BadRequestException('Email already verified');
+        }
+
+        const verificationToken = crypto.randomBytes(32).toString('hex');
+        await this.prisma.user.update({
+            where: { id: user.id },
+            data: { verificationToken },
+        });
+
+        try {
+            await this.emailService.sendVerificationEmail(user.email, verificationToken);
+        } catch (error) {
+            console.error('Failed to send verification email:', error);
+            throw new BadRequestException('Failed to send verification email. Please try again later.');
+        }
+
+        return { message: 'Verification email sent' };
+    }
+
+    async forgotPassword(email: string) {
+        const user = await this.prisma.user.findUnique({
+            where: { email },
+        });
+
+        if (!user) {
+            // To prevent enumeration, we can return success even if user not found, 
+            // but for this project explicit errors might be better for dev.
+            // Let's return success to mock security best practice
+            return { message: 'If this email exists, a password reset link has been sent.' };
+        }
+
+        const resetToken = crypto.randomBytes(32).toString('hex');
+        const resetTokenExpiry = new Date();
+        resetTokenExpiry.setHours(resetTokenExpiry.getHours() + 1); // 1 hour expiry
+
+        await this.prisma.user.update({
+            where: { id: user.id },
+            data: {
+                resetToken,
+                resetTokenExpiry,
+            },
+        });
+
+        try {
+            await this.emailService.sendPasswordResetEmail(user.email, resetToken);
+        } catch (error) {
+            console.error('Failed to send password reset email:', error);
+            // Still return success to prevent email enumeration
+            // In production, you might want to log this to a monitoring service
+        }
+
+        return { message: 'If this email exists, a password reset link has been sent.' };
+    }
+
+    async resetPassword(token: string, newPassword: string) {
+        const user = await this.prisma.user.findFirst({
+            where: {
+                resetToken: token,
+                resetTokenExpiry: { gt: new Date() },
+            },
+        });
+
+        if (!user) {
+            throw new BadRequestException('Invalid or expired reset token');
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        await this.prisma.user.update({
+            where: { id: user.id },
+            data: {
+                password: hashedPassword,
+                resetToken: null,
+                resetTokenExpiry: null,
+            },
+        });
+
+        return { message: 'Password reset successfully' };
     }
 
     async login(loginDto: LoginDto) {
@@ -34,6 +172,10 @@ export class AuthService {
 
         if (!user) {
             throw new UnauthorizedException('Invalid credentials');
+        }
+
+        if (!user.isVerified) {
+            throw new UnauthorizedException('Email not verified');
         }
 
         const isPasswordValid = await bcrypt.compare(

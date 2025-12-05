@@ -90,6 +90,12 @@ export default function LoginPage() {
                         )}
                     </div>
 
+                    <div className="flex items-center justify-end">
+                        <Link href="/auth/forgot-password" className="text-sm font-medium text-blue-400 hover:text-blue-300">
+                            Forgot password?
+                        </Link>
+                    </div>
+
                     <button
                         type="submit"
                         disabled={loginMutation.isPending}

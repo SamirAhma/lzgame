@@ -3,6 +3,53 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+
+## [2025-12-05] - Database Connection and Email Error Handling
+
+### Added
+- **DATABASE_URL**: Added missing DATABASE_URL to `.env` file for Neon PostgreSQL connection
+- **Error Handling**: Added comprehensive try-catch blocks for all email sending operations
+
+### Fixed
+- **Forgot Password 500 Error**: Resolved crash when email service fails
+  - `forgotPassword` - Returns success even if email send fails (prevents email enumeration attacks)
+  - `register` - User created successfully even if verification email fails  
+  - `resendVerification` - Throws user-friendly error if email send fails
+- **Database Connection**: Backend now connects properly to Neon PostgreSQL database
+- **TypeScript Compilation Error**: Fixed JWT config type mismatch in `auth.module.ts`
+
+### Technical Notes
+- **Resend Email Limitations**: With free tier and no custom domain:
+  - From address must be `onboarding@resend.dev`
+  - To address restricted to verified emails only (e.g., `makanayam398@gmail.com`)
+  - Emails to unverified addresses will fail gracefully without crashing the API
+  - For production: Set up custom domain in Resend and update `from` address
+
+## [2025-12-05] - Public Access Support
+
+### Added
+- **Unauthenticated Access**: Games can now be played without logging in
+  - Settings stored in localStorage for unauthenticated users
+  - Settings sync to backend for authenticated users  
+  - API errors handled gracefully to prevent crashes
+  - High scores default to empty arrays when not authenticated
+
+### Changed
+- **Backend CORS**: Expanded allowed origins to support multiple ports (3000, 3001, 3002, 127.0.0.1)
+- **Backend Listen Address**: Changed to `0.0.0.0` for broader network accessibility
+- **useSettings Hook**: 
+  - Loads from localStorage when unauthenticated
+  - Saves to localStorage when unauthenticated
+  - API failures fallback to defaults instead of crashing
+  - Always enabled, behavior changes based on auth status
+- **useHighScores Hook**:
+  - Returns empty defaults when unauthenticated
+  - API failures fallback to defaults instead of crashing
+
+### Fixed
+- **Connection Errors**: Fixed `ERR_CONNECTION_REFUSED` on home page for unauthenticated users
+- **TypeScript Error**: Fixed auth.module.ts JWT config type mismatch
+
 ## [2025-12-05] - 401 Auth Fixes
 
 ### Fixed

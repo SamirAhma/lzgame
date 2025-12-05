@@ -25,6 +25,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const router = useRouter();
 
+    const login = (token: string) => {
+        // Note: token here is just access_token passed from somewhere else? 
+        // Actually login page sets localStorage directly. 
+        // We should encourage consistency but for now, let's just match current behavior.
+        localStorage.setItem('token', token);
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        setUser({ id: payload.sub, email: payload.email });
+        router.refresh();
+    };
+
+    const logout = () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('refreshToken');
+        setUser(null);
+        router.push('/');
+    };
+
     useEffect(() => {
         const token = localStorage.getItem('token');
         if (token) {
@@ -47,23 +64,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             window.removeEventListener('auth:logout', handleLogout);
         };
     }, []);
-
-    const login = (token: string) => {
-        // Note: token here is just access_token passed from somewhere else? 
-        // Actually login page sets localStorage directly. 
-        // We should encourage consistency but for now, let's just match current behavior.
-        localStorage.setItem('token', token);
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        setUser({ id: payload.sub, email: payload.email });
-        router.refresh();
-    };
-
-    const logout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('refreshToken');
-        setUser(null);
-        router.push('/');
-    };
 
     return (
         <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user }}>

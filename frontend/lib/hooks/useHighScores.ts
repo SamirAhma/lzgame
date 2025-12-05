@@ -13,12 +13,18 @@ export function useHighScores() {
     const fetchHighScores = async (): Promise<HighScores> => {
         if (!isAuthenticated) return DEFAULT_SCORES;
 
-        const [tetris, snake] = await Promise.all([
-            api.get('/scores/tetris').then(res => res.data),
-            api.get('/scores/snake').then(res => res.data)
-        ]);
+        try {
+            const [tetris, snake] = await Promise.all([
+                api.get('/scores/tetris').then(res => res.data),
+                api.get('/scores/snake').then(res => res.data)
+            ]);
 
-        return { tetris, snake };
+            return { tetris, snake };
+        } catch (error) {
+            console.error("Failed to fetch high scores from API", error);
+            // Return empty scores on error to avoid crashing
+            return DEFAULT_SCORES;
+        }
     };
 
     const { data: highScores = DEFAULT_SCORES, isLoading } = useQuery({
