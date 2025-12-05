@@ -1,10 +1,15 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { useHighScores } from '@/lib/hooks/useHighScores';
+import AuthModal from '@/components/auth/AuthModal';
+import { useAuth } from '@/context/AuthContext';
 
 export default function Home() {
   const { highScores } = useHighScores();
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const { user, logout } = useAuth();
 
   return (
     <div className="min-h-screen flex flex-col relative overflow-hidden">
@@ -18,18 +23,23 @@ export default function Home() {
       {/* Header */}
       <header className="py-12 px-4 md:px-6 md:py-20 lg:py-24">
         <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-block mb-4 md:mb-6">
-            <span className="px-3 py-1.5 md:px-4 md:py-2 bg-gradient-to-r from-cyan-500/20 to-purple-500/20 border border-cyan-500/30 rounded-full text-cyan-300 text-xs md:text-sm font-medium backdrop-blur-sm">
-              Advanced Vision Therapy
-            </span>
-          </div>
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 mb-4 md:mb-6 leading-tight">
-            Dichoptic Training Platform
-          </h1>
-          <p className="text-lg md:text-xl lg:text-2xl text-slate-300 max-w-2xl mx-auto leading-relaxed">
-            Scientifically designed games for <span className="text-cyan-400 font-semibold">amblyopia treatment</span> using cutting-edge dichoptic technology
-          </p>
         </div>
+        <div className="absolute top-4 right-4 z-50">
+          {user ? (
+            <div className="flex items-center gap-4">
+              <span className="text-white">Welcome, {user.email}!</span>
+              <button onClick={logout} className="px-4 py-2 bg-red-600 rounded-md text-white">Logout</button>
+            </div>
+          ) : (
+            <button onClick={() => setIsAuthModalOpen(true)} className="px-4 py-2 bg-indigo-600 rounded-md text-white">Login / Register</button>
+          )}
+        </div>
+        <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 mb-4 md:mb-6 leading-tight">
+          Dichoptic Training Platform
+        </h1>
+        <p className="text-lg md:text-xl lg:text-2xl text-slate-300 max-w-2xl mx-auto leading-relaxed">
+          Scientifically designed games for <span className="text-cyan-400 font-semibold">amblyopia treatment</span> using cutting-edge dichoptic technology
+        </p>
       </header>
 
       {/* Game Selection */}
@@ -219,6 +229,7 @@ export default function Home() {
       <footer className="relative z-10 py-8 px-6 text-center text-slate-400 text-sm">
         <p>Designed for therapeutic vision training • Use with red-cyan glasses for optimal results</p>
       </footer>
+      {isAuthModalOpen && <AuthModal onClose={() => setIsAuthModalOpen(false)} />}
     </div>
   );
 }

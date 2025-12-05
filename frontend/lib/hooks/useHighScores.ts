@@ -1,82 +1,65 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { HighScores, DEFAULT_SCORES, ScoreEntry } from '@/lib/types/scores';
-import { STORAGE_KEYS, SCORE } from '@/lib/constants/game';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { HighScores, DEFAULT_SCORES } from '@/lib/types/scores';
+import { SCORE } from '@/lib/constants/game';
+import api from '@/lib/api';
+import { useAuth } from '@/context/AuthContext';
 
 export function useHighScores() {
-    const [highScores, setHighScores] = useState<HighScores>(DEFAULT_SCORES);
-    const [isLoaded, setIsLoaded] = useState(false);
+    const { isAuthenticated } = useAuth();
+    const queryClient = useQueryClient();
 
-    useEffect(() => {
-        try {
-            const stored = localStorage.getItem(STORAGE_KEYS.HIGH_SCORES);
-            if (stored) {
-                const parsed = JSON.parse(stored);
-                // Migration logic: ensure all entries are ScoreEntry objects
-                const migrateScores = (scores: any): ScoreEntry[] => {
-                    if (typeof scores === 'number') {
-                        return [{
-                            score: scores,
-                            date: new Date().toLocaleDateString(),
-                            time: '--:--'
-                        }];
-                    }
-                    if (!Array.isArray(scores)) return [];
+    const fetchHighScores = async (): Promise<HighScores> => {
+        if (!isAuthenticated) return DEFAULT_SCORES;
 
-                    return scores.map((s: any) => {
-                        if (typeof s === 'number') {
-                            return {
-                                score: s,
-                                date: new Date().toLocaleDateString(),
-                                time: '--:--'
-                            };
-                        }
-                        // Add time field if missing (for backward compatibility)
-                        if (!s.time) {
-                            return { ...s, time: '--:--' };
-                        }
-                        return s;
-                    });
-                };
+        const [tetris, snake] = await Promise.all([
+            api.get('/scores/tetris').then(res => res.data),
+            api.get('/scores/snake').then(res => res.data)
+        ]);
 
-                const migrated: HighScores = {
-                    tetris: migrateScores(parsed.tetris),
-                    snake: migrateScores(parsed.snake),
-                };
-                setHighScores(migrated);
-            }
-        } catch (error) {
-            console.error('Failed to load high scores:', error);
-        } finally {
-            setIsLoaded(true);
-        }
-    }, []);
-
-    const updateHighScore = (game: keyof HighScores, score: number) => {
-        setHighScores((prev) => {
-            const currentScores = prev[game] || [];
-
-            const now = new Date();
-            const newEntry: ScoreEntry = {
-                score,
-                date: now.toLocaleDateString(),
-                time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-            };
-
-            const newScoresList = [...currentScores, newEntry]
-                .sort((a, b) => b.score - a.score)
-                .slice(0, SCORE.MAX_HIGH_SCORES);
-
-            const newScores = { ...prev, [game]: newScoresList };
-            try {
-                localStorage.setItem(STORAGE_KEYS.HIGH_SCORES, JSON.stringify(newScores));
-            } catch (error) {
-                console.error('Failed to save high scores:', error);
-            }
-            return newScores;
-        });
+        return { tetris, snake };
     };
 
-    return { highScores, updateHighScore, isLoaded };
+    const { data: highScores = DEFAULT_SCORES, isLoading } = useQuery({
+        queryKey: ['highScores', isAuthenticated],
+        queryFn: fetchHighScores,
+        enabled: isAuthenticated,
+    });
+
+    const mutation = useMutation({
+        mutationFn: async ({ game, score }: { game: keyof HighScores; score: number }) => {
+            if (!isAuthenticated) return;
+            // Generate basic date/time string for backend validation reqs
+            // though backend might overwrite it with server time
+            const now = new Date();
+            const date = now.toLocaleDateString();
+            const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            await api.post('/scores', {
+                game,
+                score,
+                date,
+                time
+            });
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['highScores'] });
+        },
+    });
+
+    const updateHighScore = (game: keyof HighScores, score: number) => {
+        if (!isAuthenticated) {
+            console.warn("User not authenticated, score not saved to backend.");
+            // Could implement local fallback here if requested
+            return;
+        }
+        mutation.mutate({ game, score });
+    };
+
+    return {
+        highScores,
+        updateHighScore,
+        isLoaded: isAuthenticated ? !isLoading : true // If not auth, we are "loaded" with defaults
+    };
 }

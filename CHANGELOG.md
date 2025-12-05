@@ -3,6 +3,44 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+## [2025-12-05] - Database & Authentication Migration
+
+### Added
+
+#### Backend - Core Infrastructure
+- **PostgreSQL Integration**: Replaced localStorage with a real database using Prisma ORM.
+- **New Models**: Added `Score` and `Setting` models to `schema.prisma`.
+- **API Endpoints**:
+  - `POST /scores`: Save game scores (authenticated).
+  - `GET /scores/:game`: Retrieve top 10 scores per game.
+  - `PUT /settings`: Update user settings.
+  - `GET /settings`: Retrieve user settings.
+- **CORS Configuration**: Enabled CORS for `http://localhost:3000` (frontend) to communicate with backend on port `3001`.
+
+#### Frontend - Authentication & Data Persistence
+- **Auth System**:
+  - Implemented `AuthContext` for managing user sessions (login/logout).
+  - Created `AuthModal` component with Zod validation for Login/Register forms.
+  - Added "Login / Register" button to the home page.
+- **State Management**:
+  - Refactored `useHighScores` to fetch/save data via API using React Query.
+  - Refactored `useSettings` to fetch/save data via API using React Query.
+  - Replaced all usage of `localStorage` for scores and settings with backend calls.
+
+### Changed
+
+#### Port Configuration
+- **Backend Port**: Moved backend from `3000` to `3001` to resolve conflict with Frontend.
+- **Frontend API**: Updated API client base URL to `http://localhost:3001`.
+
+### Technical Details
+- **Security**:
+  - Scores and Settings are now tied to specific users via JWT authentication.
+  - API endpoints are protected with `JwtAuthGuard`.
+- **Data Integrity**: 
+  - Database schema enforces relationships between Users and their Scores/Settings.
+  - Frontend hooks now handle loading and error states from API requests.
+
 
 ## [2025-12-05] - Back Button Navigation Fix
 

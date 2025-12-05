@@ -4,6 +4,7 @@ import "./globals.css";
 import ColorProvider from "@/components/ColorProvider";
 import SettingsPanel from "@/components/SettingsPanel";
 import Providers from "./providers";
+import { AuthProvider } from "@/context/AuthContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,10 +30,12 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <Providers>
-          <ColorProvider>
-            <SettingsPanel />
-            {children}
-          </ColorProvider>
+          <AuthProvider>
+            <ColorProvider>
+              <SettingsPanel />
+              {children}
+            </ColorProvider>
+          </AuthProvider>
         </Providers>
       </body>
     </html>

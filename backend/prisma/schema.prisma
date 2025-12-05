@@ -14,4 +14,27 @@ model User {
   refreshTokenExpiry DateTime?
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
+  scores             Score[]
+  setting            Setting?
+}
+
+model Score {
+  id        Int      @id @default(autoincrement())
+  score     Int
+  game      String   // 'tetris' | 'snake'
+  date      String
+  time      String
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model Setting {
+  id            Int      @id @default(autoincrement())
+  leftEyeColor  String
+  rightEyeColor String
+  eyeDominance  String
+  userId        Int      @unique
+  user          User     @relation(fields: [userId], references: [id])
+  updatedAt     DateTime @updatedAt
 }
