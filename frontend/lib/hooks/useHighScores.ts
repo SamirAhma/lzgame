@@ -49,6 +49,12 @@ export function useHighScores() {
             const date = now.toLocaleDateString();
             const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
+            // --- ADD CHECK HERE ---
+            if (score === 0) {
+                console.log(`Local score of 0 rejected for game: ${game}`);
+                return; // Stop the mutation if score is 0
+            }
+
             if (!isAuthenticated) {
                 // Update local storage
                 const currentScores = getHighScores() || DEFAULT_SCORES;

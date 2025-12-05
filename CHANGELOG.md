@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Changed
+- **Mobile-Friendly UI**: Improved responsive design for better mobile experience (2025-12-05)
+  - Game controls now responsive across all screen sizes
+  - Optimized touch targets and button sizing for mobile devices
+  - Settings panel layout improved for smaller screens
+  - Better spacing and readability on mobile viewports
+  - Enhanced game component styling for touch interaction
+
 ### Added
 - **Navbar Component**: Created global navigation bar (2025-12-05)
   - Fixed navbar at top of all pages
@@ -11,8 +19,6 @@ All notable changes to this project will be documented in this file.
   - Integrated auth state (login/logout)
   - Auto-hides on auth pages (login/register/forgot-password)
   - Active page highlighting for better UX
-
-### Changed
 
 #### Backend Refactoring - Environment Variables
 - **What**: Extracted hardcoded configuration values to environment variables for better maintainability

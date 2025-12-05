@@ -158,22 +158,25 @@ export default function SnakeGame() {
 
     return (
         <div className="min-h-screen flex flex-col items-center justify-center p-4 relative">
-            <BackButton className="absolute top-4 left-4 z-50" />
+            {/* <BackButton className="absolute top-4 left-4 z-50" /> */}
 
-            <h1 className="text-4xl font-bold text-slate-100 mb-2">Snake</h1>
+            <h1 className="hidden lg:block text-4xl font-bold text-slate-100 mb-2">
+                Snake
+            </h1>
             <div className="flex gap-8 mb-6 text-slate-400 items-start">
                 <p>Score: {score}</p>
                 <div className="flex flex-col items-end">
                     <p>High Score: {highScores.snake[0]?.score || 0}</p>
-                    {highScores.snake[0]?.date && (
+                    {/* {highScores.snake[0]?.date && (
                         <p className="text-xs text-slate-500">{highScores.snake[0].date}</p>
-                    )}
+                    )} */}
                 </div>
             </div>
 
             <div
-                className="relative border-4 border-slate-700  bg-black"
+                className="relative bg-black"
                 style={{
+                    outline: '4px solid rgb(51 65 85)',
                     width: GRID_SIZE * CELL_SIZE,
                     height: GRID_SIZE * CELL_SIZE,
                 }}

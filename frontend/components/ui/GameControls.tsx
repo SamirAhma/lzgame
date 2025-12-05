@@ -97,7 +97,7 @@ const GameControls: FC<GameControlsProps> = ({
             </div>
 
             {/* Action Buttons - Tetris specific */}
-            {gameType === 'tetris' && (
+            {/* {gameType === 'tetris' && (
                 <div className="flex gap-1 justify-center flex-wrap">
                     {onRotate && (
                         <button
@@ -121,7 +121,7 @@ const GameControls: FC<GameControlsProps> = ({
                         </button>
                     )}
                 </div>
-            )}
+            )} */}
 
             {/* Pause Button */}
             {onPause && (

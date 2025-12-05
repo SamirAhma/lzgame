@@ -19,10 +19,10 @@ export default function Home() {
       <header className="py-12 px-4 md:px-6 md:py-20 lg:py-24">
         <div className="max-w-4xl mx-auto text-center">
         </div>
-        <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 mb-4 md:mb-6 leading-tight">
+        <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 mx-auto leading-tight text-center">
           Dichoptic Training Platform
         </h1>
-        <p className="text-lg md:text-xl lg:text-2xl text-slate-300 max-w-2xl mx-auto leading-relaxed">
+        <p className="text-lg md:text-xl lg:text-2xl text-slate-300  leading-relaxed text-center">
           Scientifically designed games for <span className="text-cyan-400 font-semibold">amblyopia treatment</span> using cutting-edge dichoptic technology
         </p>
       </header>
