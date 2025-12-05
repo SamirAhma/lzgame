@@ -6,7 +6,7 @@ import { z } from 'zod';
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { request } from '@/lib/api';
+import api from '@/lib/api';
 
 const registerSchema = z.object({
     email: z.string().email('Invalid email address'),
@@ -31,10 +31,7 @@ export default function RegisterPage() {
 
     const registerMutation = useMutation({
         mutationFn: (data: RegisterFormValues) =>
-            request('/auth/register', {
-                method: 'POST',
-                body: JSON.stringify({ email: data.email, password: data.password }),
-            }),
+            api.post('/auth/register', { email: data.email, password: data.password }).then((res) => res.data),
         onSuccess: (data) => {
             // Automatically login or redirect to login
             // For now, let's redirect to login with a success message (could be handled via query param or state)

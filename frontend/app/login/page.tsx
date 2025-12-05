@@ -6,7 +6,7 @@ import { z } from 'zod';
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { request } from '@/lib/api';
+import api from '@/lib/api';
 
 const loginSchema = z.object({
     email: z.string().email('Invalid email address'),
@@ -27,10 +27,7 @@ export default function LoginPage() {
 
     const loginMutation = useMutation({
         mutationFn: (data: LoginFormValues) =>
-            request('/auth/login', {
-                method: 'POST',
-                body: JSON.stringify(data),
-            }),
+            api.post('/auth/login', data).then((res) => res.data),
         onSuccess: (data) => {
             localStorage.setItem('token', data.access_token);
             localStorage.setItem('refreshToken', data.refresh_token);
