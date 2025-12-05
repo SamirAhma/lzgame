@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { getToken, clearAuthData } from '@/lib/utils/storage';
 
 export default function DashboardPage() {
     const router = useRouter();
     const [user, setUser] = useState<any>(null);
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
+        const token = getToken();
         if (!token) {
             router.push('/login');
             return;
@@ -20,7 +21,7 @@ export default function DashboardPage() {
     }, [router]);
 
     const handleLogout = () => {
-        localStorage.removeItem('token');
+        clearAuthData();
         router.push('/login');
     };
 

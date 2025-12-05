@@ -4,6 +4,7 @@ import { useState, Suspense } from 'react';
 import { resetPassword } from '@/lib/api';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { TIMEOUTS } from '@/lib/config/constants';
 
 function ResetPasswordForm() {
     const [password, setPassword] = useState('');
@@ -38,7 +39,7 @@ function ResetPasswordForm() {
             setMessage('Password reset successfully. Redirecting to login...');
             setTimeout(() => {
                 router.push('/login');
-            }, 3000);
+            }, TIMEOUTS.REDIRECT_DELAY);
         } catch (err) {
             setError('Failed to reset password. The link may have expired.');
         } finally {

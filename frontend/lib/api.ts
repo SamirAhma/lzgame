@@ -1,13 +1,16 @@
 import axios from 'axios';
+import { getApiUrl } from '@/lib/config/env';
+import { API_ENDPOINTS, CUSTOM_EVENTS } from '@/lib/config/constants';
+import { getToken, setToken, getRefreshToken, clearAuthData } from '@/lib/utils/storage';
 
 const api = axios.create({
-    baseURL: 'http://localhost:3001',
+    baseURL: getApiUrl(),
 });
 
 // Request interceptor to add token
 api.interceptors.request.use((config) => {
     if (typeof window !== 'undefined') {
-        const token = localStorage.getItem('token');
+        const token = getToken();
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
@@ -55,32 +58,24 @@ api.interceptors.response.use(
             originalRequest._retry = true;
             isRefreshing = true;
 
-            const refreshToken = localStorage.getItem('refreshToken');
+            const refreshToken = getRefreshToken();
 
             if (!refreshToken) {
                 // No refresh token available, logout
-                window.dispatchEvent(new Event('auth:logout'));
+                window.dispatchEvent(new Event(CUSTOM_EVENTS.AUTH_LOGOUT));
                 isRefreshing = false;
                 return Promise.reject(error);
             }
 
             try {
-                // We use axios directly to avoid interceptors loop if this fails (though baseURL is handy)
-                // But using a fresh instance or just fetch might be safer to avoid complex loops.
-                // However, simple api.post is fine usually if we don't catch 401 on it recursively.
-                // But to be safe, let's use a fresh axios call or ensure this route doesn't require auth (it shouldn't).
-                const response = await axios.post('http://localhost:3001/auth/refresh', {
+                // Use axios directly to avoid interceptors loop
+                const response = await axios.post(`${getApiUrl()}${API_ENDPOINTS.AUTH_REFRESH}`, {
                     refreshToken: refreshToken
                 });
 
                 const { access_token } = response.data;
 
-                localStorage.setItem('token', access_token);
-
-                // If backend returns a new refresh token, we should update it too. 
-                // The current backend implementation (from what I saw) returns { access_token } only?
-                // Let's check auth.service.ts again... 
-                // It returns { access_token } only on line 104. So we keep the old refresh token (7 days).
+                setToken(access_token);
 
                 api.defaults.headers.common['Authorization'] = 'Bearer ' + access_token;
                 originalRequest.headers['Authorization'] = 'Bearer ' + access_token;
@@ -93,7 +88,7 @@ api.interceptors.response.use(
                 processQueue(refreshError, null);
                 isRefreshing = false;
                 // Refresh failed (expired or invalid), complete logout
-                window.dispatchEvent(new Event('auth:logout'));
+                window.dispatchEvent(new Event(CUSTOM_EVENTS.AUTH_LOGOUT));
                 return Promise.reject(refreshError);
             }
         }
@@ -103,19 +98,20 @@ api.interceptors.response.use(
 );
 
 export const verifyEmail = async (token: string) => {
-    return api.post('/auth/verify-email', { token });
+    return api.post(API_ENDPOINTS.AUTH_VERIFY_EMAIL, { token });
 };
 
 export const resendVerification = async (email: string) => {
-    return api.post('/auth/resend-verification', { email });
+    return api.post(API_ENDPOINTS.AUTH_RESEND_VERIFICATION, { email });
 };
 
 export const forgotPassword = async (email: string) => {
-    return api.post('/auth/forgot-password', { email });
+    return api.post(API_ENDPOINTS.AUTH_FORGOT_PASSWORD, { email });
 };
 
 export const resetPassword = async (token: string, password: string) => {
-    return api.post('/auth/reset-password', { token, password });
+    return api.post(API_ENDPOINTS.AUTH_RESET_PASSWORD, { token, password });
 };
 
 export default api;
+

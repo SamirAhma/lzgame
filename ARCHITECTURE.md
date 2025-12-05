@@ -28,6 +28,13 @@ lzgame/
 │   └── SettingsPanel.tsx        # Settings modal
 │
 ├── lib/
+│   ├── config/                  # Configuration layer
+│   │   ├── constants.ts         # App-wide constants
+│   │   └── env.ts               # Environment variables
+│   │
+│   ├── utils/                   # Utility functions
+│   │   └── storage.ts           # localStorage wrapper
+│   │
 │   ├── constants/
 │   │   └── game.ts              # Game configuration constants
 │   │
@@ -35,8 +42,12 @@ lzgame/
 │   │   ├── useHighScores.ts     # High scores management
 │   │   └── useSettings.ts       # Settings management
 │   │
-│   └── types/
-│       └── scores.ts            # TypeScript type definitions
+│   ├── types/
+│   │   ├── api.ts               # API response types
+│   │   ├── scores.ts            # Score type definitions
+│   │   └── settings.ts          # Settings type definitions
+│   │
+│   └── api.ts                   # API client configuration
 │
 └── public/                      # Static assets
 ```
@@ -108,6 +119,89 @@ const board = Array(TETRIS.BOARD_HEIGHT)
   .map(() => Array(TETRIS.BOARD_WIDTH).fill('empty'));
 setScore(prev => prev + SCORE.TETRIS_LINE_POINTS);
 ```
+
+## 🌍 Environment Configuration
+
+All environment-specific configuration is handled via environment variables:
+
+```bash
+# Frontend (.env.local)
+NEXT_PUBLIC_API_URL="http://localhost:3001"
+```
+
+In code, we access these variables with fallbacks:
+
+```typescript
+// lib/config/env.ts
+export function getApiUrl(): string {
+  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+}
+
+// lib/api.ts
+const api = axios.create({
+    baseURL: getApiUrl(),
+});
+```
+
+## 🔧 Configuration Layer
+
+All application constants are centralized in `lib/config/constants.ts`:
+
+```typescript
+// Storage Keys
+export const STORAGE_KEYS = {
+  TOKEN: 'token',
+  REFRESH_TOKEN: 'refreshToken',
+  SETTINGS: 'lazy_eye_settings',
+} as const;
+
+// API Endpoints
+export const API_ENDPOINTS = {
+  AUTH_LOGIN: '/auth/login',
+  SETTINGS: '/settings',
+  SCORES: '/scores',
+  // ... more endpoints
+} as const;
+
+// Timeouts (milliseconds)
+export const TIMEOUTS = {
+  REDIRECT_DELAY: 3000,
+  TETRIS_MERGE_DELAY: 50,
+  TETRIS_GAME_LOOP: 1000,
+} as const;
+```
+
+**Benefits**:
+- Single source of truth for all magic values
+- Easy to update without searching through code
+- Type-safe with `as const` assertion
+- Self-documenting constant names
+
+## 💾 Storage Utilities
+
+Type-safe localStorage wrapper in `lib/utils/storage.ts`:
+
+```typescript
+// Token management
+import { getToken, setToken, removeToken } from '@/lib/utils/storage';
+
+const token = getToken();
+setToken('new-token');
+removeToken();
+
+// Settings management
+import { getSettings, setSettings } from '@/lib/utils/storage';
+
+const settings = getSettings(); // Returns UserSettings | null
+setSettings(newSettings);
+```
+
+**Benefits**:
+- SSR-safe (automatic window checks)
+- Centralized error handling
+- Type-safe (returns typed objects)
+- Consistent API across the app
+- Easy to swap storage mechanism (e.g., to cookies)
 
 ## 🎨 Component Design Patterns
 

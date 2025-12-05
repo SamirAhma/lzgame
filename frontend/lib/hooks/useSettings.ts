@@ -4,6 +4,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { UserSettings, DEFAULT_SETTINGS } from '@/lib/types/settings';
 import api from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
+import { getSettings, setSettings as saveSettings } from '@/lib/utils/storage';
+import { API_ENDPOINTS } from '@/lib/config/constants';
 
 
 export function useSettings() {
@@ -13,26 +15,19 @@ export function useSettings() {
     const fetchSettings = async (): Promise<UserSettings> => {
         if (!isAuthenticated) {
             // Try to load from local storage
-            if (typeof window !== 'undefined') {
-                const local = localStorage.getItem('lazy_eye_settings');
-                if (local) {
-                    try {
-                        return { ...DEFAULT_SETTINGS, ...JSON.parse(local) };
-                    } catch (e) {
-                        console.error("Failed to parse local settings", e);
-                    }
-                }
+            const local = getSettings();
+            if (local) {
+                return { ...DEFAULT_SETTINGS, ...local };
             }
             return DEFAULT_SETTINGS;
         }
 
         try {
-            const res = await api.get('/settings');
+            const res = await api.get(API_ENDPOINTS.SETTINGS);
             return res.data || DEFAULT_SETTINGS;
         } catch (error) {
             console.error("Failed to fetch settings from API", error);
-            // Fallback to defaults or local storage if API fails?
-            // For now, let's return defaults to avoid crashing
+            // Fallback to defaults or local storage if API fails
             return DEFAULT_SETTINGS;
         }
     };
@@ -50,12 +45,12 @@ export function useSettings() {
 
             if (!isAuthenticated) {
                 // Save to local storage
-                localStorage.setItem('lazy_eye_settings', JSON.stringify(updated));
+                saveSettings(updated);
                 return updated;
             }
 
             // Authenticated: Save to backend
-            await api.put('/settings', updated);
+            await api.put(API_ENDPOINTS.SETTINGS, updated);
             return updated;
         },
         onSuccess: (data) => {

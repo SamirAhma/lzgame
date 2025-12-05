@@ -5,6 +5,7 @@ import { HighScores, DEFAULT_SCORES } from '@/lib/types/scores';
 import { SCORE } from '@/lib/constants/game';
 import api from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
+import { API_ENDPOINTS } from '@/lib/config/constants';
 
 export function useHighScores() {
     const { isAuthenticated } = useAuth();
@@ -15,8 +16,8 @@ export function useHighScores() {
 
         try {
             const [tetris, snake] = await Promise.all([
-                api.get('/scores/tetris').then(res => res.data),
-                api.get('/scores/snake').then(res => res.data)
+                api.get(API_ENDPOINTS.SCORES_TETRIS).then(res => res.data),
+                api.get(API_ENDPOINTS.SCORES_SNAKE).then(res => res.data)
             ]);
 
             return { tetris, snake };
@@ -42,7 +43,7 @@ export function useHighScores() {
             const date = now.toLocaleDateString();
             const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-            await api.post('/scores', {
+            await api.post(API_ENDPOINTS.SCORES, {
                 game,
                 score,
                 date,

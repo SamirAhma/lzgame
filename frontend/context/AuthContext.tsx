@@ -1,6 +1,8 @@
 'use client';
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { getToken, setToken, clearAuthData } from '@/lib/utils/storage';
+import { CUSTOM_EVENTS } from '@/lib/config/constants';
 
 interface User {
     id: number;
@@ -26,31 +28,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const router = useRouter();
 
     const login = (token: string) => {
-        // Note: token here is just access_token passed from somewhere else? 
-        // Actually login page sets localStorage directly. 
-        // We should encourage consistency but for now, let's just match current behavior.
-        localStorage.setItem('token', token);
+        setToken(token);
         const payload = JSON.parse(atob(token.split('.')[1]));
         setUser({ id: payload.sub, email: payload.email });
         router.refresh();
     };
 
     const logout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('refreshToken');
+        clearAuthData();
         setUser(null);
         router.push('/');
     };
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
+        const token = getToken();
         if (token) {
             try {
                 const payload = JSON.parse(atob(token.split('.')[1]));
                 setUser({ id: payload.sub, email: payload.email });
             } catch (e) {
-                localStorage.removeItem('token');
-                localStorage.removeItem('refreshToken');
+                clearAuthData();
             }
         }
 
@@ -58,10 +55,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             logout();
         };
 
-        window.addEventListener('auth:logout', handleLogout);
+        window.addEventListener(CUSTOM_EVENTS.AUTH_LOGOUT, handleLogout);
 
         return () => {
-            window.removeEventListener('auth:logout', handleLogout);
+            window.removeEventListener(CUSTOM_EVENTS.AUTH_LOGOUT, handleLogout);
         };
     }, []);
 

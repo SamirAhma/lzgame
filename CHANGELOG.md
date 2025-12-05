@@ -4,6 +4,47 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+- **Configuration Layer**: Created centralized configuration system
+  - `lib/config/constants.ts` - All app-wide constants (storage keys, API endpoints, timeouts, custom events)
+  - `lib/config/env.ts` - Type-safe environment variable access with validation
+- **Storage Utilities**: Created type-safe localStorage wrapper (`lib/utils/storage.ts`)
+  - SSR-safe with automatic window checks
+  - Centralized error handling
+  - Dedicated functions for tokens, refresh tokens, and settings
+- **Type Definitions**: Added API response types (`lib/types/api.ts`)
+  - LoginResponse, RefreshResponse, RegisterResponse
+  - ScoreResponse, SettingsResponse
+  - ApiError interface
+
+### Changed
+- **Frontend Configuration**: Refactored API URL constant to use `NEXT_PUBLIC_API_URL` environment variable with fallback to `http://localhost:3001`.
+- **Environment**: Added support for `.env.local` configuration.
+- **Code Organization**: Extracted all hardcoded values to centralized constants
+  - Storage keys: `'token'`, `'refreshToken'`, `'lazy_eye_settings'` → `STORAGE_KEYS.*`
+  - API endpoints: All hardcoded paths → `API_ENDPOINTS.*`
+  - Timeouts: `3000ms`, `50ms`, `1000ms` → `TIMEOUTS.*`
+  - Custom events: `'auth:logout'` → `CUSTOM_EVENTS.AUTH_LOGOUT`
+- **Refactored Files** (12 files updated):
+  - `lib/api.ts` - Uses env config, storage utilities, and API endpoint constants
+  - `context/AuthContext.tsx` - Uses storage utilities and event constants
+  - `app/login/page.tsx` - Uses storage utilities and API constants
+  - `app/dashboard/page.tsx` - Uses storage utilities
+  - `lib/hooks/useSettings.ts` - Uses storage utilities and API constants
+  - `lib/hooks/useHighScores.ts` - Uses API endpoint constants
+  - `app/auth/reset-password/page.tsx` - Uses timeout constants
+  - `components/games/Tetris.tsx` - Uses timeout constants for delays
+
+### Technical Details
+- **Maintainability**: All magic values centralized in single location
+- **Type Safety**: Typed environment variables and API responses
+- **Testability**: Easy to mock storage and configuration
+- **Consistency**: Single pattern for localStorage access
+- **SSR Safety**: Centralized window checks prevent SSR errors
+- **Backward Compatible**: All changes maintain existing functionality
+- **Test Coverage**: All 30 tests passing after refactoring
+
+
 ## [2025-12-05] - Score Submission Bug Fix
 
 ### Fixed

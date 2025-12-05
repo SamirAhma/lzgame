@@ -7,6 +7,7 @@ import BackButton from '@/components/ui/BackButton';
 import GameOverlay from '@/components/ui/GameOverlay';
 import GameControls from '@/components/ui/GameControls';
 import { TETRIS, CONTROLS, SCORE } from '@/lib/constants/game';
+import { TIMEOUTS } from '@/lib/config/constants';
 
 const { BOARD_WIDTH, BOARD_HEIGHT, CELL_SIZE } = TETRIS;
 
@@ -177,7 +178,7 @@ export default function TetrisGame() {
             newY++;
         }
         setCurrentPiece({ ...currentPiece, y: newY });
-        setTimeout(mergePiece, 50);
+        setTimeout(mergePiece, TIMEOUTS.TETRIS_MERGE_DELAY);
     }, [currentPiece, gameOver, isPaused, checkCollision, mergePiece]);
 
     useEffect(() => {
@@ -227,7 +228,7 @@ export default function TetrisGame() {
 
         gameLoopRef.current = setInterval(() => {
             movePiece(0, 1);
-        }, 1000);
+        }, TIMEOUTS.TETRIS_GAME_LOOP);
 
         return () => {
             if (gameLoopRef.current) {

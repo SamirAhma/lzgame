@@ -1,5 +1,3 @@
-'use client';
-
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -7,6 +5,8 @@ import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import api from '@/lib/api';
+import { setToken, setRefreshToken } from '@/lib/utils/storage';
+import { API_ENDPOINTS } from '@/lib/config/constants';
 
 const loginSchema = z.object({
     email: z.string().email('Invalid email address'),
@@ -27,10 +27,10 @@ export default function LoginPage() {
 
     const loginMutation = useMutation({
         mutationFn: (data: LoginFormValues) =>
-            api.post('/auth/login', data).then((res) => res.data),
+            api.post(API_ENDPOINTS.AUTH_LOGIN, data).then((res) => res.data),
         onSuccess: (data) => {
-            localStorage.setItem('token', data.access_token);
-            localStorage.setItem('refreshToken', data.refresh_token);
+            setToken(data.access_token);
+            setRefreshToken(data.refresh_token);
             router.push('/dashboard');
         },
     });
