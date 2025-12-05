@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Changed
+- **Dependencies**: Upgraded pnpm lock file for frontend (2025-12-05)
 - **Mobile-Friendly UI**: Improved responsive design for better mobile experience (2025-12-05)
   - Game controls now responsive across all screen sizes
   - Optimized touch targets and button sizing for mobile devices
