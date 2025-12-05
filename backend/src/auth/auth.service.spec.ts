@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 import { UnauthorizedException, BadRequestException, NotFoundException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -31,6 +32,10 @@ describe('AuthService', () => {
     sendPasswordResetEmail: jest.fn(),
   };
 
+  const mockConfigService = {
+    get: jest.fn((key: string, defaultValue?: any) => defaultValue),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -46,6 +51,10 @@ describe('AuthService', () => {
         {
           provide: EmailService,
           useValue: mockEmailService,
+        },
+        {
+          provide: ConfigService,
+          useValue: mockConfigService,
         },
       ],
     }).compile();

@@ -4,6 +4,30 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Changed
+
+#### Backend Refactoring - Environment Variables
+- **What**: Extracted hardcoded configuration values to environment variables for better maintainability
+- **Files Modified**:
+  - `backend/.env.example` - Added comprehensive environment variable documentation
+  - `backend/src/main.ts` - Uses ConfigService for port and CORS origins
+  - `backend/src/auth/jwt.strategy.ts` - Uses ConfigService for JWT secret
+  - `backend/src/auth/auth.service.ts` - Uses ConfigService for bcrypt salt rounds and token expiry times
+  - `backend/src/auth/auth.service.spec.ts` - Added ConfigService mock for tests
+- **New Environment Variables**:
+  - `PORT` - Server port (default: 3001)
+  - `CORS_ORIGINS` - Comma-separated allowed origins
+  - `BCRYPT_SALT_ROUNDS` - Password hashing salt rounds (default: 10)
+  - `ACCESS_TOKEN_EXPIRY` - Access token expiration (default: 15m)
+  - `REFRESH_TOKEN_EXPIRY` - Refresh token expiration (default: 7d)
+  - `PASSWORD_RESET_EXPIRY_HOURS` - Password reset token expiry (default: 1)
+- **Benefits**:
+  - Centralized configuration management
+  - Easy to adjust settings per environment (dev/staging/prod)
+  - No hardcoded values in source code
+  - Improved security (no fallback secrets in code)
+- **Test Results**: ✅ All 38 backend tests passing
+
 ### Added
 - **Configuration Layer**: Created centralized configuration system
   - `lib/config/constants.ts` - All app-wide constants (storage keys, API endpoints, timeouts, custom events)

@@ -1,5 +1,6 @@
 import { Injectable, UnauthorizedException, BadRequestException, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
@@ -10,16 +11,27 @@ import * as crypto from 'crypto';
 
 @Injectable()
 export class AuthService {
+    private readonly saltRounds: number;
+    private readonly accessTokenExpiry: string;
+    private readonly refreshTokenExpiry: string;
+    private readonly passwordResetExpiryHours: number;
+
     constructor(
         private prisma: PrismaService,
         private jwtService: JwtService,
         private emailService: EmailService,
-    ) { }
+        private configService: ConfigService,
+    ) {
+        this.saltRounds = this.configService.get<number>('BCRYPT_SALT_ROUNDS', 10);
+        this.accessTokenExpiry = this.configService.get<string>('ACCESS_TOKEN_EXPIRY', '15m');
+        this.refreshTokenExpiry = this.configService.get<string>('REFRESH_TOKEN_EXPIRY', '7d');
+        this.passwordResetExpiryHours = this.configService.get<number>('PASSWORD_RESET_EXPIRY_HOURS', 1);
+    }
 
     async register(registerDto: RegisterDto) {
         const { email, password } = registerDto;
 
-        const hashedPassword = await bcrypt.hash(password, 10);
+        const hashedPassword = await bcrypt.hash(password, this.saltRounds);
         const verificationToken = crypto.randomBytes(32).toString('hex');
 
         try {
@@ -118,7 +130,7 @@ export class AuthService {
 
         const resetToken = crypto.randomBytes(32).toString('hex');
         const resetTokenExpiry = new Date();
-        resetTokenExpiry.setHours(resetTokenExpiry.getHours() + 1); // 1 hour expiry
+        resetTokenExpiry.setHours(resetTokenExpiry.getHours() + this.passwordResetExpiryHours);
 
         await this.prisma.user.update({
             where: { id: user.id },
@@ -151,7 +163,7 @@ export class AuthService {
             throw new BadRequestException('Invalid or expired reset token');
         }
 
-        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        const hashedPassword = await bcrypt.hash(newPassword, this.saltRounds);
 
         await this.prisma.user.update({
             where: { id: user.id },
@@ -188,13 +200,14 @@ export class AuthService {
         }
 
         const payload = { email: user.email, sub: user.id };
-        const accessToken = this.jwtService.sign(payload, { expiresIn: '3m' }); // 3 minutes for testing
-        const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' }); // 7 days
+        const accessToken = this.jwtService.sign(payload, { expiresIn: this.accessTokenExpiry as any });
+        const refreshToken = this.jwtService.sign(payload, { expiresIn: this.refreshTokenExpiry as any });
 
         // Hash and store refresh token
-        const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
+        const hashedRefreshToken = await bcrypt.hash(refreshToken, this.saltRounds);
         const refreshTokenExpiry = new Date();
-        refreshTokenExpiry.setDate(refreshTokenExpiry.getDate() + 7); // 7 days from now
+        const daysToAdd = parseInt(this.refreshTokenExpiry.replace('d', ''));
+        refreshTokenExpiry.setDate(refreshTokenExpiry.getDate() + daysToAdd);
 
         await this.prisma.user.update({
             where: { id: user.id },
@@ -241,7 +254,7 @@ export class AuthService {
 
             // Generate new access token
             const newPayload = { email: user.email, sub: user.id };
-            const newAccessToken = this.jwtService.sign(newPayload, { expiresIn: '3m' }); // 3 minutes for testing
+            const newAccessToken = this.jwtService.sign(newPayload, { expiresIn: this.accessTokenExpiry as any });
 
             return {
                 access_token: newAccessToken,
