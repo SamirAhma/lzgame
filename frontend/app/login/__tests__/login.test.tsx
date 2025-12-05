@@ -14,7 +14,9 @@ vi.mock('next/navigation', () => ({
 // Mock the API request function
 const mockRequest = vi.fn();
 vi.mock('@/lib/api', () => ({
-    request: (...args: any[]) => mockRequest(...args),
+    default: {
+        post: (...args: any[]) => mockRequest(...args),
+    },
 }));
 
 // Setup QueryClient for React Query
@@ -67,7 +69,8 @@ describe('LoginPage', () => {
         renderComponent();
 
         const mockToken = 'fake-jwt-token';
-        mockRequest.mockResolvedValueOnce({ access_token: mockToken });
+        // Axios returns an object with a data property
+        mockRequest.mockResolvedValueOnce({ data: { access_token: mockToken, refresh_token: 'fake-refresh' } });
 
         fireEvent.change(screen.getByLabelText(/Email Address/i), { target: { value: 'test@example.com' } });
         fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'password123' } });
@@ -75,10 +78,7 @@ describe('LoginPage', () => {
         fireEvent.click(screen.getByRole('button', { name: /Sign In/i }));
 
         await waitFor(() => {
-            expect(mockRequest).toHaveBeenCalledWith('/auth/login', {
-                method: 'POST',
-                body: JSON.stringify({ email: 'test@example.com', password: 'password123' }),
-            });
+            expect(mockRequest).toHaveBeenCalledWith('/auth/login', { email: 'test@example.com', password: 'password123' });
             expect(localStorage.getItem('token')).toBe(mockToken);
             expect(mockPush).toHaveBeenCalledWith('/dashboard');
         });

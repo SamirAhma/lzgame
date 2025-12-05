@@ -185,4 +185,4 @@ Private project - All rights reserved
 
 
 
-Email: test@example.com, Password: c
+Email: test@example.com, Password: password123

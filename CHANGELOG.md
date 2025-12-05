@@ -13,6 +13,21 @@ All notable changes to this project will be documented in this file.
   - Implemented global `auth:logout` event to cleanly handle situations where refresh fails (e.g., refresh token expired).
 - **Auth Context**: Updated `AuthContext` to listen for forced logout events and clear session data completely.
 
+## [2025-12-05] - Tests & Build Update
+
+### Added
+- **Frontend Tests**:
+  - Added unit tests for `GameCard` component.
+  - Fixed and enabled `Login` and `Register` page tests with correct API mocking.
+- **Backend Tests**:
+  - Added unit tests for `ScoresService` (100% coverage).
+
+### Changed
+- **Build Process**:
+  - Updated `frontend/package.json` to run tests (`vitest run`) before building.
+  - Updated `backend/package.json` to run tests (`pnpm test`) before building.
+  - Ensures no broken code reaches production build artifacts.
+
 ## [2025-12-05] - Frontend Build Fix
 
 ### Fixed

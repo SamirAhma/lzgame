@@ -14,7 +14,9 @@ vi.mock('next/navigation', () => ({
 // Mock the API request function
 const mockRequest = vi.fn();
 vi.mock('@/lib/api', () => ({
-    request: (...args: any[]) => mockRequest(...args),
+    default: {
+        post: (...args: any[]) => mockRequest(...args),
+    },
 }));
 
 // Setup QueryClient for React Query
@@ -80,7 +82,8 @@ describe('RegisterPage', () => {
     it('submits the form successfully and redirects', async () => {
         renderComponent();
 
-        mockRequest.mockResolvedValueOnce({ success: true });
+        // Axios returns data property
+        mockRequest.mockResolvedValueOnce({ data: { success: true } });
 
         fireEvent.change(screen.getByLabelText(/Email Address/i), { target: { value: 'test@example.com' } });
         fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'password123' } });
@@ -89,10 +92,7 @@ describe('RegisterPage', () => {
         fireEvent.click(screen.getByRole('button', { name: /Create Account/i }));
 
         await waitFor(() => {
-            expect(mockRequest).toHaveBeenCalledWith('/auth/register', {
-                method: 'POST',
-                body: JSON.stringify({ email: 'test@example.com', password: 'password123' }),
-            });
+            expect(mockRequest).toHaveBeenCalledWith('/auth/register', { email: 'test@example.com', password: 'password123' });
             expect(mockPush).toHaveBeenCalledWith('/login');
         });
     });
