@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+## [2025-12-05] - 401 Auth Fixes
+
+### Fixed
+- **Authentication**: Fixed persistent 401 Unauthorized errors after 3 minutes of usage.
+  - Implemented missing refresh token logic in frontend `api.ts`.
+  - Added response interceptor to automatically try refreshing the token when a 401 occurs.
+  - Added request queuing to handle concurrent requests during a token refresh.
+  - Implemented global `auth:logout` event to cleanly handle situations where refresh fails (e.g., refresh token expired).
+- **Auth Context**: Updated `AuthContext` to listen for forced logout events and clear session data completely.
+
+## [2025-12-05] - Frontend Build Fix
+
+### Fixed
+- **API Import Error**: Fixed build failure caused by incorrect named import (`{ request }`) in Login and Register pages. Updated to use the default `api` axios instance.
+- **Build Status**: Verified `npm run build` now passes for both frontend and backend.
+
 ## [2025-12-05] - Database & Authentication Migration
 
 ### Added

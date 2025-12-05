@@ -182,3 +182,7 @@ All scripts can be run from the root directory:
 ## License
 
 Private project - All rights reserved
+
+
+
+Email: test@example.com, Password: c

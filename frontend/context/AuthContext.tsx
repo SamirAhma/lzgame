@@ -33,11 +33,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 setUser({ id: payload.sub, email: payload.email });
             } catch (e) {
                 localStorage.removeItem('token');
+                localStorage.removeItem('refreshToken');
             }
         }
+
+        const handleLogout = () => {
+            logout();
+        };
+
+        window.addEventListener('auth:logout', handleLogout);
+
+        return () => {
+            window.removeEventListener('auth:logout', handleLogout);
+        };
     }, []);
 
     const login = (token: string) => {
+        // Note: token here is just access_token passed from somewhere else? 
+        // Actually login page sets localStorage directly. 
+        // We should encourage consistency but for now, let's just match current behavior.
         localStorage.setItem('token', token);
         const payload = JSON.parse(atob(token.split('.')[1]));
         setUser({ id: payload.sub, email: payload.email });
@@ -46,6 +60,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const logout = () => {
         localStorage.removeItem('token');
+        localStorage.removeItem('refreshToken');
         setUser(null);
         router.push('/');
     };
