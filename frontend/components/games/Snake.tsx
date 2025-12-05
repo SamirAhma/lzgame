@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useHighScores } from '@/lib/hooks/useHighScores';
 import BackButton from '@/components/ui/BackButton';
 import GameOverlay from '@/components/ui/GameOverlay';
+import GameControls from '@/components/ui/GameControls';
 import { SNAKE, CONTROLS, SCORE } from '@/lib/constants/game';
 
 const { GRID_SIZE, CELL_SIZE, INITIAL_SPEED } = SNAKE;
@@ -215,9 +216,19 @@ export default function SnakeGame() {
                 <GameOverlay isVisible={isPaused && !gameOver} title="PAUSED" />
             </div>
 
-            <div className="mt-6 text-center text-slate-400 space-y-2">
-                <p>Arrow Keys to Move | P to Pause</p>
-                <p className="text-sm">
+            <GameControls
+                gameType="snake"
+                onUp={() => direction !== 'DOWN' && setNextDirection('UP')}
+                onDown={() => direction !== 'UP' && setNextDirection('DOWN')}
+                onLeft={() => direction !== 'RIGHT' && setNextDirection('LEFT')}
+                onRight={() => direction !== 'LEFT' && setNextDirection('RIGHT')}
+                onPause={() => setIsPaused((prev) => !prev)}
+                disabled={gameOver}
+            />
+
+            <div className="mt-2 text-center text-slate-400 space-y-1">
+                <p className="hidden md:block text-sm">Arrow Keys to Move | P to Pause</p>
+                <p className="text-xs md:text-sm">
                     <span style={{ color: 'var(--left-eye)' }}>Snake (Left Eye)</span> |{' '}
                     <span style={{ color: 'var(--right-eye)' }}>Food (Right Eye)</span>
                 </p>

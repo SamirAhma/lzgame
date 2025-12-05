@@ -4,6 +4,32 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2025-12-05] - Game Control Buttons
+
+### Added
+- **GameControls Component**: Created reusable button controls for both games
+  - Compact, responsive design for mobile/touch devices
+  - Directional buttons (↑ ↓ ← →) for movement
+  - Tetris-specific: Rotate and Hard Drop buttons
+  - Pause button for both games
+  - Works alongside keyboard controls
+- **Snake Game**: Added touch-friendly control buttons below game board
+- **Tetris Game**: Added touch-friendly control buttons with rotate/drop actions
+- **Conditional Keyboard Info**: Keyboard instructions only shown on desktop (md+ screens)
+
+### Changed
+- **Button Sizing**: Reduced button sizes to prevent scrolling (48px mobile, 56px desktop)
+- **Compact Layout**: Minimized spacing (gap-1, mt-3) to fit all controls on screen
+- **Text Sizing**: Smaller text (xs on mobile, sm on desktop) for better fit
+
+### Technical Details
+- Component: `frontend/components/ui/GameControls.tsx`
+- Supports both keyboard and button controls simultaneously
+- Touch-optimized with `touch-manipulation` and proper sizing
+- Disabled state when game is over
+- Responsive breakpoints for mobile (sm:) devices
+- Desktop-only keyboard hints using `hidden md:block`
+
 ## [2025-12-05] - Database Connection and Email Error Handling
 
 ### Added

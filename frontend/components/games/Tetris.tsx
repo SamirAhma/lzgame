@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useHighScores } from '@/lib/hooks/useHighScores';
 import BackButton from '@/components/ui/BackButton';
 import GameOverlay from '@/components/ui/GameOverlay';
+import GameControls from '@/components/ui/GameControls';
 import { TETRIS, CONTROLS, SCORE } from '@/lib/constants/game';
 
 const { BOARD_WIDTH, BOARD_HEIGHT, CELL_SIZE } = TETRIS;
@@ -332,9 +333,21 @@ export default function TetrisGame() {
                 <GameOverlay isVisible={isPaused && !gameOver} title="PAUSED" />
             </div>
 
-            <div className="mt-6 text-center text-slate-400 space-y-2">
-                <p>← → Move | ↑ Rotate | ↓ Soft Drop | Space Hard Drop | P Pause</p>
-                <p className="text-sm">
+            <GameControls
+                gameType="tetris"
+                onUp={rotatePiece}
+                onDown={() => movePiece(0, 1)}
+                onLeft={() => movePiece(-1, 0)}
+                onRight={() => movePiece(1, 0)}
+                onRotate={rotatePiece}
+                onDrop={dropPiece}
+                onPause={() => setIsPaused((prev) => !prev)}
+                disabled={gameOver}
+            />
+
+            <div className="mt-2 text-center text-slate-400 space-y-1">
+                <p className="hidden md:block text-sm">← → Move | ↑ Rotate | ↓ Soft Drop | Space Hard Drop | P Pause</p>
+                <p className="text-xs md:text-sm">
                     <span style={{ color: 'var(--left-eye)' }}>Active Piece (Left Eye)</span> |{' '}
                     <span style={{ color: 'var(--right-eye)' }}>Stack (Right Eye)</span>
                 </p>
