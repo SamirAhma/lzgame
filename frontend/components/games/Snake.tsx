@@ -22,6 +22,7 @@ export default function SnakeGame() {
     const [score, setScore] = useState(0);
     const [isPaused, setIsPaused] = useState(false);
     const gameLoopRef = useRef<NodeJS.Timeout | null>(null);
+    const scoreSubmittedRef = useRef(false);
     const { updateHighScore, highScores } = useHighScores();
     const router = useRouter();
 
@@ -138,7 +139,8 @@ export default function SnakeGame() {
     }, [moveSnake, gameOver, isPaused]);
 
     useEffect(() => {
-        if (gameOver) {
+        if (gameOver && !scoreSubmittedRef.current) {
+            scoreSubmittedRef.current = true;
             updateHighScore('snake', score);
         }
     }, [gameOver, score, updateHighScore]);
@@ -151,6 +153,7 @@ export default function SnakeGame() {
         setGameOver(false);
         setScore(0);
         setIsPaused(false);
+        scoreSubmittedRef.current = false;
     };
 
     return (

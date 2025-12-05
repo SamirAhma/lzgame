@@ -73,5 +73,50 @@ describe('ScoresService', () => {
             });
             expect(result).toEqual(mockCreatedScore);
         });
+
+        it('should preserve score value when creating', async () => {
+            const userId = 1;
+            const scoreData = { score: 250, game: 'snake', date: '2023-01-03', time: '16:00' };
+            const mockCreatedScore = { id: 3, ...scoreData, userId };
+
+            (prisma.score.create as jest.Mock).mockResolvedValue(mockCreatedScore);
+
+            const result = await service.addScore(userId, scoreData);
+
+            expect(result.score).toBe(250);
+        });
+
+        it('should handle zero scores (regression test for bug)', async () => {
+            const userId = 1;
+            const scoreData = { score: 0, game: 'tetris', date: '2023-01-04', time: '18:00' };
+            const mockCreatedScore = { id: 4, ...scoreData, userId };
+
+            (prisma.score.create as jest.Mock).mockResolvedValue(mockCreatedScore);
+
+            const result = await service.addScore(userId, scoreData);
+
+            expect(prisma.score.create).toHaveBeenCalledWith({
+                data: {
+                    score: 0,
+                    game: 'tetris',
+                    date: '2023-01-04',
+                    time: '18:00',
+                    userId: 1,
+                },
+            });
+            expect(result.score).toBe(0);
+        });
+
+        it('should handle large scores', async () => {
+            const userId = 2;
+            const scoreData = { score: 999999, game: 'snake', date: '2023-01-05', time: '20:00' };
+            const mockCreatedScore = { id: 5, ...scoreData, userId };
+
+            (prisma.score.create as jest.Mock).mockResolvedValue(mockCreatedScore);
+
+            const result = await service.addScore(userId, scoreData);
+
+            expect(result.score).toBe(999999);
+        });
     });
 });

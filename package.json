@@ -9,7 +9,7 @@
         "dev:backend": "cd backend && pnpm start:dev",
         "buildtest": "cd frontend && pnpm test && pnpm build && cd ../backend && pnpm test && pnpm build",
         "build": "cd frontend && pnpm build && cd ../backend && pnpm build",
-        "test": "cd frontend && pnpm test",
+        "test": "cd frontend && pnpm test && cd ../backend && pnpm test",
         "test:frontend": "cd frontend && pnpm test",
         "test:backend": "cd backend && pnpm test"
     },

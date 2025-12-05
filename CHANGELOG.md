@@ -4,6 +4,82 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2025-12-05] - Score Submission Bug Fix
+
+### Fixed
+
+#### Zero Score Bug (Critical Regression Fix)
+- **Problem**: All game scores (Snake and Tetris) were being saved as 0 in the database
+- **Root Cause**: `useEffect` hook with dependencies `[gameOver, score, updateHighScore]` was running twice:
+  1. First run: When `gameOver` changed to `true` (correct submission with actual score)
+  2. Second run: When `resetGame()` set both `gameOver` to `false` AND `score` to `0` (incorrect submission with 0)
+- **Solution**: Added `scoreSubmittedRef` (React ref) to track submission status
+  - Score only submits once when game ends
+  - Ref prevents resubmission when game resets
+  - Ref is reset when starting a new game
+
+### Added
+
+#### Comprehensive Test Coverage
+- **Backend Tests** (38 total passing):
+  - `scores.controller.spec.ts` - NEW controller tests with edge cases
+    - Tests for zero scores (regression test)
+    - Tests for large scores
+    - Validates score value preservation
+  - `scores.service.spec.ts` - Enhanced with additional tests
+    - Regression test for zero score bug
+    - Edge case testing (zero, large values)
+    - Score value preservation validation
+
+- **Frontend Tests** (30 total passing):
+  - `Snake.test.tsx` - NEW comprehensive game tests
+    - Single submission verification (regression test)
+    - Zero score prevention after `resetGame`
+    - Score calculation for multiple food items
+  - `Tetris.test.tsx` - NEW comprehensive game tests  
+    - Single submission verification (regression test)
+    - Zero score prevention after `resetGame`
+    - Score calculation for multiple lines cleared
+
+### Changed
+
+#### Modified Files
+- **Frontend**:
+  - `components/games/Snake.tsx` - Added `scoreSubmittedRef` to prevent double-submission
+  - `components/games/Tetris.tsx` - Added `scoreSubmittedRef` to prevent double-submission
+  - `components/games/__tests__/Snake.test.tsx` - NEW test file
+  - `components/games/__tests__/Tetris.test.tsx` - NEW test file
+
+- **Backend**:
+  - `src/scores/scores.controller.spec.ts` - NEW test file with comprehensive coverage
+  - `src/scores/scores.service.spec.ts` - Enhanced with edge case tests
+
+### Technical Details
+
+#### Bug Timeline
+1. User reported all scores showing as 0 in database
+2. Added debug logging to trace score values through system
+3. Discovered `useEffect` running twice per game
+4. Identified `resetGame()` triggering additional score submission
+5. Implemented `scoreSubmittedRef` fix
+6. Added regression tests to prevent future occurrences
+
+#### Test Results
+```bash
+# Frontend Tests
+✓ 30 tests passing (including 10 new game tests)
+
+# Backend Tests  
+✓ 38 tests passing (including 8 new score tests)
+```
+
+### Migration Notes
+- No database changes required
+- No API changes required
+- Existing high scores remain intact
+- Fix is backward compatible
+
+
 ## [2025-12-05] - Game Control Buttons
 
 ### Added
